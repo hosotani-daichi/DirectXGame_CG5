@@ -65,7 +65,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ID3DBlob* psBlob = nullptr;    // ピクセルシェーダーオブジェクト
 	//ID3DBlob* errorBlob = nullptr; // エラーオブジェクト
 	// 頂点シェーダーの読み込みとコンパイル
-	std::wstring vsFile = L"Resources/shader/TestVS.hlsl";
+	std::wstring vsFile = L"Resources/shaders/TestVS.hlsl";
 	hr = D3DCompileFromFile(
 	    vsFile.c_str(), // シェーダーファイル名
 	    nullptr,
@@ -82,7 +82,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 
 	// ピクセルシェーダーの読み込みとコンパイル
-	std::wstring psFile = L"Resources/shader/TestPS.hlsl";
+	std::wstring psFile = L"Resources/shaders/TestPS.hlsl";
 	hr = D3DCompileFromFile(
 	    psFile.c_str(), // シェーダーファイル名
 	    nullptr,
@@ -142,6 +142,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	// リソースの先頭アドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	//使用するリソースのサイズは頂点三つ分のサイズ
+	vertexBufferView.SizeInBytes = sizeof(Vector4)*3;
 	// 1つの頂点のサイズ
 	vertexBufferView.StrideInBytes = sizeof(Vector4);
 
@@ -149,8 +151,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Vector4* vertexData = nullptr;
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f}; // 左下
-	vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};   // 上
-	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};  // 右下
+	vertexData[1] = { 0.0f,  0.5f, 0.0f, 1.0f};   // 上
+	vertexData[2] = { 0.5f, -0.5f, 0.0f, 1.0f};  // 右下
 	// 頂点リソースのマップを解除する
 	vertexResource->Unmap(0, nullptr);
 
