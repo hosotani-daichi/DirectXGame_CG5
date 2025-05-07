@@ -1,7 +1,7 @@
 #include "KamataEngine.h"
 #include "Shader.h"
 #include <Windows.h>
-#include <d3dcompiler.h>
+//#include <d3dcompiler.h>
 
 using namespace KamataEngine;
 
@@ -33,8 +33,8 @@ using namespace KamataEngine;
 //	return shaderBlob;
 // }
 
-// 関数プロトタイプ宣言
-ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
+//// 関数プロトタイプ宣言
+//ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
