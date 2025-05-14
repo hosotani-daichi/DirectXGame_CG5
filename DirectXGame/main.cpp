@@ -1,7 +1,7 @@
 #include "KamataEngine.h"
 #include "Shader.h"
 #include <Windows.h>
-//#include <d3dcompiler.h>
+// #include <d3dcompiler.h>
 
 using namespace KamataEngine;
 
@@ -34,7 +34,7 @@ using namespace KamataEngine;
 // }
 
 //// 関数プロトタイプ宣言
-//ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
+// ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -94,7 +94,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// shader---------------------------------------------------------------------
 	// 頂点シェーダーの読み込みとコンパイル
 	Shader vs;
-	vs.LoadDxc(L"Resources/shaders/TestVS.hlsl",L"vs_5_0");
+	vs.LoadDxc(L"Resources/shaders/TestVS.hlsl", L"vs_5_0");
 	assert(vs.GetDxcBlob() != nullptr);
 
 	// ID3DBlob* vsBlob = CompileShader(L"Resources/shaders/TestVS.hlsl", "vs_5_0");
@@ -110,8 +110,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// PSO(PipelineStateObject)の生成-------------------------------------------
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature;                                         // RootSignature
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;                                          // InputLayout
+	graphicsPipelineStateDesc.pRootSignature = rootSignature;                                               // RootSignature
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;                                                // InputLayout
 	graphicsPipelineStateDesc.VS = {vs.GetDxcBlob()->GetBufferPointer(), vs.GetDxcBlob()->GetBufferSize()}; // VertexShader
 	graphicsPipelineStateDesc.PS = {ps.GetDxcBlob()->GetBufferPointer(), ps.GetDxcBlob()->GetBufferSize()}; // PixelShader
 	// graphicsPipelineStateDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()};
