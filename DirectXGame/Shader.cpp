@@ -7,7 +7,7 @@
 
 void Shader::Load(const std::wstring& filePath, const std::wstring& shaderModel) {
 
-	std::string mbShaderModel = 
+	std::string mbShaderModel = ;
 
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
@@ -16,7 +16,7 @@ void Shader::Load(const std::wstring& filePath, const std::wstring& shaderModel)
 	    filePath.c_str(), // シェーダーファイル名
 	    nullptr,
 	    D3D_COMPILE_STANDARD_FILE_INCLUDE,               // インクルード可能にする
-	    "main", shaderModel.c_str(),                     // エントリーポイント名、シェーダーモデル指定
+	    "main", mbShaderModel.c_str(),                   // エントリーポイント名、シェーダーモデル指定
 	    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, // デバッグ用設定
 	    0, &shaderBlob, &errorBlob);
 
