@@ -7,7 +7,7 @@
 
 void Shader::Load(const std::wstring& filePath, const std::wstring& shaderModel) {
 
-	std::string mbShaderModel = ;
+	std::string mbShaderModel = ConvertString(shaderModel);
 
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
