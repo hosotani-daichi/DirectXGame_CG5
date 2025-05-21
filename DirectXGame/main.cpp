@@ -5,37 +5,6 @@
 
 using namespace KamataEngine;
 
-////シェーダーコンパイル関数
-////filePath :シェーダーファイルのパス
-////shaderModel :シェーダーモデル
-// ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel) {
-//	ID3DBlob* shaderBlob = nullptr;
-//	ID3DBlob* errorBlob = nullptr;
-//
-//	HRESULT hr =
-//	    D3DCompileFromFile(
-//			filePath.c_str(),
-//			nullptr,
-//			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-//			"main", shaderModel.c_str(),
-//			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-//			0, &shaderBlob, &errorBlob);
-//
-//	//エラーが発生した場合、止める
-//	if (FAILED(hr)) {
-//		if (errorBlob) {
-//			OutputDebugStringA(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-//			errorBlob->Release();
-//		}
-//		assert(false);
-//	}
-//	//生成したshaderBlobを返す
-//	return shaderBlob;
-// }
-
-//// 関数プロトタイプ宣言
-//ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
@@ -97,16 +66,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	vs.Load(L"Resources/shaders/TestVS.hlsl","vs_5_0");
 	assert(vs.GetBlob() != nullptr);
 
-	// ID3DBlob* vsBlob = CompileShader(L"Resources/shaders/TestVS.hlsl", "vs_5_0");
-	// assert(vsBlob != nullptr);
-
 	// ピクセルシェーダーの読み込みとコンパイル
 	Shader ps;
 	ps.Load(L"Resources/shaders/TestPS.hlsl", "ps_5_0");
 	assert(ps.GetBlob() != nullptr);
-
-	// ID3DBlob* psBlob = CompileShader(L"Resources/shaders/TestPS.hlsl", "ps_5_0");
-	// assert(psBlob != nullptr);
 
 	// PSO(PipelineStateObject)の生成-------------------------------------------
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
@@ -114,8 +77,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;                                          // InputLayout
 	graphicsPipelineStateDesc.VS = {vs.GetBlob()->GetBufferPointer(), vs.GetBlob()->GetBufferSize()}; // VertexShader
 	graphicsPipelineStateDesc.PS = {ps.GetBlob()->GetBufferPointer(), ps.GetBlob()->GetBufferSize()}; // PixelShader
-	// graphicsPipelineStateDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()};
-	// graphicsPipelineStateDesc.PS = {psBlob->GetBufferPointer(), psBlob->GetBufferSize()};
 	graphicsPipelineStateDesc.BlendState = blendDesc;           // BlendState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc; // RasterizerState
 	// 書き込むRTVの情報
@@ -195,8 +156,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	graphicsPipeLineState->Release();
 	signatureBlob->Release();
 	rootSignature->Release();
-	// vsBlob->Release();
-	// psBlob->Release();
 
 	// エンジンの終了処理
 	KamataEngine::Finalize();
