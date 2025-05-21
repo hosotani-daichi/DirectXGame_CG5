@@ -23,5 +23,4 @@ public:
 private:
 	ID3DBlob* blob_ = nullptr; // コンストラクトで初期化しなくていい
 	IDxcBlob* dxcBlob_ = nullptr;
-	MiscUtility* miscUtility_ = nullptr;
 };
