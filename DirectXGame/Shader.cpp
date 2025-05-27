@@ -73,7 +73,7 @@ void Shader::LoadDxc(const std::wstring& filePath, const std::wstring& shaderMod
 	    L"-T",
 	    shaderModel.c_str(), // ShaderProfileの設定
 	    L"-Zi",
-	    L"- Qembed_debug", // デバッグ用の情報を埋め込む
+	    L"-Qembed_debug", // デバッグ用の情報を埋め込む
 	    L"-Od",            // 最適化を外しておく
 	    L"-Zpr",           // メモリレイアウトは行優先
 	};
