@@ -31,28 +31,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	RootSignature rs;
 	rs.Create();
 
-	//// InputLayout-------------------------------------------------------------
-	//D3D12_INPUT_ELEMENT_DESC inoutElementDescs[1] = {};
-	//inoutElementDescs[0].SemanticName = "POSITION";
-	//inoutElementDescs[0].SemanticIndex = 0;
-	//inoutElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	//inoutElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	//D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	//inputLayoutDesc.pInputElementDescs = inoutElementDescs;
-	//inputLayoutDesc.NumElements = _countof(inoutElementDescs);
-
-	//// BrendState---------------------------------------------------------------
-	//D3D12_BLEND_DESC blendDesc{};
-	//// すべての色要素を書き込む
-	//blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	//// RasterizerState----------------------------------------------------------
-	//D3D12_RASTERIZER_DESC rasterizerDesc{};
-	//// 裏面(反時計回り)をカリングする
-	//rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	//// 塗りつぶしモードをソリッドにする(ワイヤーフレームならD3D12_FIll_MODE_WIREFRAME)
-	//rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-
 	// shader---------------------------------------------------------------------
 	// 頂点シェーダーの読み込みとコンパイル
 	Shader vs;
@@ -64,58 +42,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ps.LoadDxc(L"Resources/shaders/TestPS.hlsl", L"ps_6_0");
 	assert(ps.GetDxcBlob() != nullptr);
 
-	//// PSO(PipelineStateObject)の生成-------------------------------------------
-	//D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	//graphicsPipelineStateDesc.pRootSignature = rs.Get();                                                    // RootSignature
-	//graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;                                                // InputLayout
-	//graphicsPipelineStateDesc.VS = {vs.GetDxcBlob()->GetBufferPointer(), vs.GetDxcBlob()->GetBufferSize()}; // VertexShader
-	//graphicsPipelineStateDesc.PS = {ps.GetDxcBlob()->GetBufferPointer(), ps.GetDxcBlob()->GetBufferSize()}; // PixelShader
-	//graphicsPipelineStateDesc.BlendState = blendDesc;                                                       // BlendState
-	//graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;                                             // RasterizerState
-	//// 書き込むRTVの情報
-	//graphicsPipelineStateDesc.NumRenderTargets = 1; // 1つのRTVに書き込む　*2つ同時にしようと思えばできる
-	//graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//// 利用するトポロジ(形状)のタイプ。三角形
-	//graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//// どのように画面に色を打ち込むかの設定(今は気にしなくていい)
-	//graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	//graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	//// 準備は整った。PSOを生成する
-	//ID3D12PipelineState* graphicsPipeLineState = nullptr;
-	//HRESULT hr = dxCommon->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipeLineState));
-	//assert(SUCCEEDED(hr));
-
 	//PipelineState作成-----------------------------------------------------------------
 	PipelineState pipelineState;
 	SetupPipelineState(pipelineState, rs, vs, ps);
-
-	//// VertexResourceの生成----------------------------------------------------------------
-	//// 頂点リソース用のヒープの設定
-	//D3D12_HEAP_PROPERTIES uploadHeapProperties{};
-	//uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // CPUから書き込むヒープ
-	//// 頂点リソースの設定
-	//D3D12_RESOURCE_DESC vertexResourceDesc{};
-	//vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; // バッファ
-	//vertexResourceDesc.Width = sizeof(Vector4) * 3;                 // リソースのサイズ。今回はVector4を3頂点分
-	//vertexResourceDesc.Height = 1;
-	//vertexResourceDesc.DepthOrArraySize = 1;
-	//vertexResourceDesc.MipLevels = 1;
-	//vertexResourceDesc.SampleDesc.Count = 1;
-	//// バッファの場合はこれにする決まり
-	//vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	//// 実際に頂点リソースを生成する
-	//ID3D12Resource* vertexResource = nullptr;
-	//HRESULT hr = dxCommon->GetDevice()->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
-	//assert(SUCCEEDED(hr)); // うまくいかなかったときは起動できない
-
-	//// VertexBufferViewを作成する-----------------------------------------
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	//// リソースの先頭アドレスから使う
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//// 使用するリソースのサイズは頂点三つ分のサイズ
-	//vertexBufferView.SizeInBytes = sizeof(Vector4) * 3;
-	//// 1つの頂点のサイズ
-	//vertexBufferView.StrideInBytes = sizeof(Vector4);
 
 	//VertexBuffer(VertexResource,VertexResourceView)の生成
 	VertexBuffer vb;
@@ -153,8 +82,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 
 	// 解放処理
-	//vertexResource->Release();
-	//graphicsPipeLineState->Release();
 
 	// エンジンの終了処理
 	KamataEngine::Finalize();
@@ -179,6 +106,13 @@ void SetupPipelineState(PipelineState& pipelineState, RootSignature& rs, Shader&
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	//RasterizerState------------------------------
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	//裏面(反時計回り)をカリングする
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	//塗りつぶしモードをリソッドにする
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//PSO(PpipelineStateObject)の生成----------------------
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
