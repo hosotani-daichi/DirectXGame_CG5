@@ -1,8 +1,9 @@
 #include "KamataEngine.h"
-#include "RootSignature.h"
 #include "PipelineState.h"
-#include "VertexBuffer.h"
+#include "RootSignature.h"
 #include "Shader.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 #include <Windows.h>
 // #include <d3dcompiler.h>
 
@@ -42,22 +43,49 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ps.LoadDxc(L"Resources/shaders/TestPS.hlsl", L"ps_6_0");
 	assert(ps.GetDxcBlob() != nullptr);
 
-	//PipelineState作成-----------------------------------------------------------------
+	// PipelineState作成-----------------------------------------------------------------
 	PipelineState pipelineState;
 	SetupPipelineState(pipelineState, rs, vs, ps);
 
-	//VertexBuffer(VertexResource,VertexResourceView)の生成
+	// リソースの確保含め、頂点情報を柔軟に対応できるようにVertexData構造体を新たに作成する
+	// Vertex4 => VertexDataに変更して利用する
+	struct VertexData {
+		Vector4 position;
+	};
+
+	// 頂点データの準備
+	VertexData vertices[] = {
+	    {0.0f,  0.5f,  0.0f, 1.0f}, //上
+	    {0.5f,  -0.5f, 0.0f, 1.0f}, //右下
+	    {-0.5f, -0.5f, 0.0f, 1.0f}, //左下
+	};
+
+	// VertexBuffer(VertexResource,VertexResourceView)の生成
 	VertexBuffer vb;
 	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
 
-	// 頂点リソースにデータを書き込む-------------------------------------------
-	Vector4* vertexData = nullptr;
-	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f}; // 左下
-	vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};   // 上
-	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};  // 右下
-	// 頂点リソースのマップを解除する
-	//vb.Get()->Unmap(0, nullptr);
+	//頂点リソースにデータを書き込む -------------------
+	VertexData* pGpuVertices = nullptr;
+	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuVertices));
+
+	for (int i = 0; i < _countof(vertices); ++i) {
+		pGpuVertices[i] = vertices[i];
+	}
+
+	//頂点インデックスの準備
+	uint16_t indices[] = {0, 1, 2};
+
+	//IndexBuffer(IndexResource,IndexResourceVireew)の生成
+	IndexBuffer ib;
+	ib.Create(sizeof(indices), sizeof(indices[0]));
+
+	//頂点インデックスリソースにデータを書き込む
+	uint16_t* pGpuIndices = nullptr;
+	ib.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuIndices));
+
+	for (int i = 0; i < _countof(indices); ++i) {
+		pGpuIndices[i] = indices[i];
+	}
 
 	// メインループ
 	while (true) {
@@ -69,13 +97,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		dxCommon->PreDraw();
 
 		// コマンドを積む
-		commandList->SetGraphicsRootSignature(rs.Get());          // RootSignatureの設定
-		commandList->SetPipelineState(pipelineState.Get());     // PSOの設定をする
-		commandList->IASetVertexBuffers(0, 1, vb.GetView());          // VBVの設定をする
+		commandList->SetGraphicsRootSignature(rs.Get());     // RootSignatureの設定
+		commandList->SetPipelineState(pipelineState.Get()); // PSOの設定をする
+		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVの設定をする
+		commandList->IASetIndexBuffer(ib.GetView());         //IVBを設定する
 		// トポロジの設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		// 頂点数、インデクス数、インデックスの開始位置、インデックスのオフセット
-		commandList->DrawInstanced(3, 1, 0, 0);
+		//commandList->DrawInstanced(3, 1, 0, 0);
+		commandList->DrawIndexedInstanced(_countof(indices), 1,0,0,0);
 
 		// 描画終了
 		dxCommon->PostDraw();
@@ -91,7 +121,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 void SetupPipelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps) {
 
-	//InputLayout--------------------------------------------
+	// InputLayout--------------------------------------------
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
@@ -101,20 +131,20 @@ void SetupPipelineState(PipelineState& pipelineState, RootSignature& rs, Shader&
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-	
-	//BlendState----------------------------------今回は不透明
+
+	// BlendState----------------------------------今回は不透明
 	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
+	// すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-	//RasterizerState------------------------------
+	// RasterizerState------------------------------
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	//裏面(反時計回り)をカリングする
+	// 裏面(反時計回り)をカリングする
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	//塗りつぶしモードをリソッドにする
+	// 塗りつぶしモードをリソッドにする
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	//PSO(PpipelineStateObject)の生成----------------------
+	// PSO(PpipelineStateObject)の生成----------------------
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rs.Get();
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
@@ -122,15 +152,15 @@ void SetupPipelineState(PipelineState& pipelineState, RootSignature& rs, Shader&
 	graphicsPipelineStateDesc.PS = {ps.GetDxcBlob()->GetBufferPointer(), ps.GetDxcBlob()->GetBufferSize()};
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
-	//書き込むRTVの情報
+	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//利用するトポロジ(形状)のタイプ。三角形
+	// 利用するトポロジ(形状)のタイプ。三角形
 	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//どのように画面に色を打ち込むかの設定(今は気にしなくていい)
+	// どのように画面に色を打ち込むかの設定(今は気にしなくていい)
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	//準備は整った。PSOを生成する
+	// 準備は整った。PSOを生成する
 	pipelineState.Create(graphicsPipelineStateDesc);
 }
