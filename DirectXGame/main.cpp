@@ -1,9 +1,9 @@
+#include "IndexBuffer.h"
 #include "KamataEngine.h"
 #include "PipelineState.h"
 #include "RootSignature.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
-#include "IndexBuffer.h"
 #include <Windows.h>
 // #include <d3dcompiler.h>
 
@@ -51,20 +51,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// Vertex4 => VertexDataに変更して利用する
 	struct VertexData {
 		Vector4 position;
+		Vector2 texcoord;
 	};
 
 	// 頂点データの準備
 	VertexData vertices[] = {
-	    {-1.0f,  -1.0f,  0.0f, 1.0f}, //  上
-	    {-1.0f,  3.0f, 0.0f, 1.0f}, //  右下
-	    {3.0f, -1.0f, 0.0f, 1.0f}, //  左下
+	    //  x      y     z     w       u     v
+	    {{-1.0f, 1.0f, 0.0f, 1.0f},  {0.0f, 0.0f}}, // 左上
+	    {{1.0f, 1.0f, 0.0f, 1.0f},   {1.0f, 0.0f}}, // 右上
+	    {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 左下
+	    {{1.0f, -1.0f, 0.0f, 1.0f},  {1.0f, 1.0f}}, // 右下
 	};
 
 	// VertexBuffer(VertexResource,VertexResourceView)の生成
 	VertexBuffer vb;
 	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
 
-	//頂点リソースにデータを書き込む -------------------
+	// 頂点リソースにデータを書き込む -------------------
 	VertexData* pGpuVertices = nullptr;
 	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuVertices));
 
@@ -72,14 +75,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		pGpuVertices[i] = vertices[i];
 	}
 
-	//頂点インデックスの準備
-	uint16_t indices[] = {0, 1, 2};
+	// 頂点インデックスの準備
+	uint16_t indices[] = {0, 1, 2, 2, 1, 3};
 
-	//IndexBuffer(IndexResource,IndexResourceVireew)の生成
+	// IndexBuffer(IndexResource,IndexResourceVireew)の生成
 	IndexBuffer ib;
 	ib.Create(sizeof(indices), sizeof(indices[0]));
 
-	//頂点インデックスリソースにデータを書き込む
+	// 頂点インデックスリソースにデータを書き込む
 	uint16_t* pGpuIndices = nullptr;
 	ib.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuIndices));
 
@@ -98,14 +101,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// コマンドを積む
 		commandList->SetGraphicsRootSignature(rs.Get());     // RootSignatureの設定
-		commandList->SetPipelineState(pipelineState.Get()); // PSOの設定をする
+		commandList->SetPipelineState(pipelineState.Get());  // PSOの設定をする
 		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVの設定をする
-		commandList->IASetIndexBuffer(ib.GetView());         //IVBを設定する
+		commandList->IASetIndexBuffer(ib.GetView());         // IVBを設定する
 		// トポロジの設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		// 頂点数、インデクス数、インデックスの開始位置、インデックスのオフセット
-		//commandList->DrawInstanced(3, 1, 0, 0);
-		commandList->DrawIndexedInstanced(_countof(indices), 1,0,0,0);
+		// commandList->DrawInstanced(3, 1, 0, 0);
+		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 
 		// 描画終了
 		dxCommon->PostDraw();
@@ -122,12 +125,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 void SetupPipelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps) {
 
 	// InputLayout--------------------------------------------
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
+	inputElementDescs[1].SemanticName = "TEXCOORD";
+	inputElementDescs[1].SemanticIndex = 0;
+	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
