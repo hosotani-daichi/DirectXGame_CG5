@@ -102,7 +102,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// RenderTexture関係
 
-	// RenderTextureResourceの作成
+	// 0.RenderTextureResourceの作成
 
 	// 画面クリア色
 	const FLOAT kRenderTargetClearColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
