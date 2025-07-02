@@ -15,5 +15,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     float32_t4 textureColor = gTexture.Sample(gSampler, uv);
     //位置セット(x y z w )かカラーセット(r g b a)でアクセスできる
     output.color = textureColor;
+    ////grayscale
+    //float32_t value = dot(textureColor.rgb, float32_t3(0.2125f, 0.0721f));
+    //output.color = float32_t4(value, value, value, textureColor.a);
     return output;
 }
