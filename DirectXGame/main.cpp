@@ -6,6 +6,7 @@
 #include "VertexBuffer.h"
 #include <Windows.h>
 #include "WorldTransformEx.h"
+#include <cassert>
 // #include <d3dcompiler.h>
 
 using namespace KamataEngine;
